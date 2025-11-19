@@ -3,47 +3,84 @@ import psycopg2
 from pgvector.psycopg2 import register_vector
 from openai import OpenAI
 from dotenv import load_dotenv,find_dotenv
+from langchain_community.document_loaders import DirectoryLoader,TextLoader,PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 _=load_dotenv(find_dotenv())
 
 OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
-
-db_params={
-    "dbname" : "embeddings",
-    "user":"postgres",
-    "password":"postgres",
-    "host":"localhost",
-    "port":"5433"
-}
-
 client = OpenAI(api_key=OPENAI_API_KEY)
+print(client)
 
-def split_into_chunks(text,size=500):
-    words = text.split()
-    chunks = []
+#For load the text file
+def load_documents():
+    loader = DirectoryLoader(
+        path = "files/",
+        loader_cls=TextLoader,
+        glob="**/*.pdf"
+    )
+    docs=loader.load()
+    return docs
 
-    for i in range(0,len(words), size):
-        chunk = " ".join(words[i:i+size])
-        chunks.append(chunk)
+#For load the PDF
+# def load_documents():
+#     loader = DirectoryLoader(
+#         path = "files/",
+#         loader_cls=PyPDFLoader,
+#         glob="**/*.pdf"
+#     )
+#     docs=loader.load()
+#     return docs
+
+
+
+def split_documents(docs):
+    splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 50)
+    chunks = splitter.split_documents(docs)
     return chunks
 
-with open('raina.txt','r') as f:
-    doc_txt = f.read()
+def embed_text(text):
+    response = client.embeddings.create(model= "text-embedding-3-small",input = text)
+    return response.data[0].embedding
 
-chunks = split_into_chunks(doc_txt)
+def connect_db():
+    conn = psycopg2.connect(
+        database= "rag",
+        user="postgres",
+        password="postgres",
+        host="localhost",
+        port="5433"
+    )
+    return conn
 
-conn = psycopg2.connect(**db_params)
-register_vector(conn)
+def insert_embedding(conn,text,embedding):
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO  documents (chunk_text,embedding) VALUES (%s,%s)",(text,embedding)
+    )
+    conn.commit()
+    cur.close()
 
-cur = conn.cursor()
 
-for chunk in chunks:
-    embedding = client.embeddings.create(
-        model = "text-embedding-3-small",
-        input = chunk
-    ).data[0].embedding
+def main():
+    print("Loading documents...")
+    docs = load_documents()
 
-    cur.execute("INSERT INTO sentences (content,embedding) VALUES (%s,%s)",(chunk,embedding))
+    print("Splitting into chunks...")
+    chunks = split_documents(docs)
+    print(f"Total Chunks: {len(chunks)}")
 
-conn.commit()
-cur.close()
-conn.close()
+    conn = connect_db()
+
+    for idx, chunk in enumerate(chunks):
+        text = chunk.page_content
+        print(f"Embedding chunk {idx+1}/{len(chunks)}")
+
+        embedding = embed_text(text)   # list of floats
+
+        insert_embedding(conn, text, embedding)
+
+    conn.close()
+    print("All embeddings stored successfully ")
+
+if __name__ == "__main__":
+    main()

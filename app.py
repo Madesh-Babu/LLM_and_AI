@@ -11,7 +11,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 db_params = {
-    "dbname": "embeddings",
+    "dbname": "rag",
     "user": "postgres",
     "password": "postgres",
     "host": "localhost",
@@ -36,10 +36,9 @@ def ask():
     register_vector(conn)
     cur = conn.cursor()
 
-    # FIXED QUERY
     cur.execute("""
-        SELECT content, embedding <-> %s::vector AS distance
-        FROM sentences
+        SELECT chunk_text, embedding <-> %s::vector AS distance
+        FROM documents
         ORDER BY distance ASC
         LIMIT 3;
     """, (query_emb,))
@@ -51,10 +50,10 @@ def ask():
 
     # Combine results
     contexts = "\n\n".join([row[0] for row in rows])
-
     # 3. Ask OpenAI with context
     prompt = f"""
-    You are a friendly assistant. Use the context to answer the question. Greet back the user if greeted
+    You are a friendly assistant. Use the context to answer the question. Greet back the user if greeted. 
+    But the question looks like 18+ content or any harmful question means dont answer that question.
 
     CONTEXT:
     {contexts}
