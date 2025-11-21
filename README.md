@@ -14,7 +14,7 @@ A Flask-based REST API that implements Retrieval-Augmented Generation (RAG) usin
 
 ```
 LEARN_RAG/
-├── app/
+├── src/
 │   ├── __init__.py          # Flask app initialization
 │   ├── config.py            # Configuration management
 │   ├── routes/
@@ -142,7 +142,7 @@ Ask a question and get an answer based on stored documents.
 
 ## Configuration
 
-The application uses the following configuration (in `app/config.py`):
+The application uses the following configuration (in `src/config.py`):
 
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `PG_URI`: PostgreSQL connection string
