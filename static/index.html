@@ -53,6 +53,13 @@
                         <i class="fas fa-comments"></i>
                         <h2>Ask Questions</h2>
                         <div class="voice-controls">
+                            <div class="voice-mode-selector">
+                                <label class="voice-mode-label">Voice Mode:</label>
+                                <div class="voice-mode-toggle">
+                                    <button class="voice-mode-btn active" id="browserVoiceBtn" onclick="switchToBrowserVoice()">Browser</button>
+                                    <button class="voice-mode-btn" id="ragentVoiceBtn" onclick="switchToRagentVoice()">Real-time</button>
+                                </div>
+                            </div>
                             <label class="toggle-switch" title="Auto-speak AI responses">
                                 <input type="checkbox" id="autoSpeakToggle" checked>
                                 <span class="toggle-slider"></span>
@@ -114,5 +121,7 @@
     </div>
 
     <script src="/static/js/app.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/static/js/ragent.js"></script>
 </body>
 </html>
