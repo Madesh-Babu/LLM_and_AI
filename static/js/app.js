@@ -773,11 +773,63 @@ function testTTS() {
     speak(testMessage);
 }
 
-// Enhanced browser support check with TTS initialization
+// Voice Mode Switching
+let currentVoiceMode = 'browser'; // 'browser' or 'ragent'
+
+function switchToBrowserVoice() {
+    currentVoiceMode = 'browser';
+    
+    // Update UI
+    document.getElementById('browserVoiceBtn').classList.add('active');
+    document.getElementById('ragentVoiceBtn').classList.remove('active');
+    
+    // Update voice button
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (voiceBtn) {
+        voiceBtn.onclick = toggleVoiceRecording;
+        voiceBtn.title = 'Browser-based voice input';
+        voiceBtn.style.backgroundColor = '';
+    }
+    
+    // Disconnect ragent if connected
+    if (window.ragentClient && window.ragentClient.isConnected) {
+        window.ragentClient.disconnect();
+    }
+    
+    addMessage('bot', '🎤 Switched to **Browser-based voice** (Web Speech API)');
+    console.log('🎤 Switched to browser voice mode');
+}
+
+function switchToRagentVoice() {
+    currentVoiceMode = 'ragent';
+    
+    // Update UI
+    document.getElementById('ragentVoiceBtn').classList.add('active');
+    document.getElementById('browserVoiceBtn').classList.remove('active');
+    
+    // Update voice button
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (voiceBtn) {
+        voiceBtn.onclick = toggleRagentVoice;
+        voiceBtn.title = 'Real-time voice (ragent)';
+        voiceBtn.style.backgroundColor = '#8b5cf6';
+    }
+    
+    addMessage('bot', '🚀 Switched to **Real-time voice** (ragent gateway)');
+    console.log('🚀 Switched to ragent voice mode');
+    
+    // Initialize ragent if not already connected
+    if (window.ragentClient && !window.ragentClient.isConnected) {
+        initRagentVoice();
+    }
+}
+
+// Enhanced browser support check
 function checkBrowserSupport() {
     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
     const hasSpeechSynthesis = 'speechSynthesis' in window;
     const hasGetUserMedia = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    const hasWebSocket = 'WebSocket' in window || 'io' in window;
 
     if (!hasSpeechRecognition) {
         console.warn('Speech recognition not supported');
@@ -786,6 +838,13 @@ function checkBrowserSupport() {
             voiceBtn.title = 'Speech recognition not supported in this browser. Use Chrome, Edge, or Safari.';
         }
         addMessage('bot', '🎤 **Speech recognition is not supported** in your current browser. For the best experience, please use Chrome, Edge, or Safari.');
+        
+        // Disable browser voice button
+        const browserBtn = document.getElementById('browserVoiceBtn');
+        if (browserBtn) {
+            browserBtn.disabled = true;
+            browserBtn.style.opacity = '0.5';
+        }
     }
 
     if (!hasSpeechSynthesis) {
@@ -825,6 +884,18 @@ function checkBrowserSupport() {
     if (!hasGetUserMedia) {
         console.warn('Microphone access not supported');
         addMessage('bot', '🎤 **Microphone access is not supported** in your current browser.');
+    }
+
+    if (!hasWebSocket) {
+        console.warn('WebSocket not supported');
+        addMessage('bot', '🔗 **WebSocket not supported** - Real-time voice (ragent) may not work properly.');
+        
+        // Disable ragent button
+        const ragentBtn = document.getElementById('ragentVoiceBtn');
+        if (ragentBtn) {
+            ragentBtn.disabled = true;
+            ragentBtn.style.opacity = '0.5';
+        }
     }
 
     // Check microphone permissions on load
