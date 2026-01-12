@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader, PyPDFLoader
@@ -10,10 +10,20 @@ upload_bp = Blueprint("upload", __name__)
 UPLOAD_DIR = "uploaded_files"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@upload_bp.route("/upload", methods=["POST"])
+@upload_bp.route("/upload", methods=["POST", "OPTIONS"])
 def upload_file():
+    # Handle CORS preflight request
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Methods", "POST")
+        return response
+
     if "file" not in request.files:
-        return jsonify({"error": "File missing"}), 400
+        response = make_response(jsonify({"error": "File missing"}), 400)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
     file = request.files["file"]
     filename = file.filename
@@ -28,7 +38,9 @@ def upload_file():
     elif filename.endswith(".pdf"):
         loader = PyPDFLoader(filepath)
     else:
-        return jsonify({"error": "Only .txt or .pdf allowed"}), 400
+        response = make_response(jsonify({"error": "Only .txt or .pdf allowed"}), 400)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
     docs = loader.load()
 
@@ -40,4 +52,6 @@ def upload_file():
     vectorstore = get_vectorstore()
     vectorstore.add_documents(chunks)
 
-    return jsonify({"message": "File processed & embeddings stored", "filename": filename})
+    response = make_response(jsonify({"message": "File processed & embeddings stored", "filename": filename}))
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response

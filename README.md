@@ -1,34 +1,46 @@
-# RAG-Based Q&A API
+# RAG-Based Q&A System
 
-A Flask-based REST API that implements Retrieval-Augmented Generation (RAG) using LangChain, OpenAI embeddings, and PostgreSQL with pgvector for semantic search.
+A full-stack application that implements Retrieval-Augmented Generation (RAG) using LangChain, OpenAI embeddings, and PostgreSQL with pgvector for semantic search. Features a modern web interface for document upload and interactive Q&A.
 
 ## Features
 
-- Document embedding and storage in PostgreSQL with pgvector
-- Semantic search using OpenAI embeddings
-- RAG pipeline with GPT-4o-mini for question answering
-- RESTful API endpoint for queries
-- Automatic context retrieval from stored documents
+- **Modern Web Interface**: Beautiful, responsive UI for document upload and chat-based Q&A
+- **Document Upload**: Support for TXT and PDF file uploads with real-time processing
+- **Semantic Search**: Vector-based document retrieval using OpenAI embeddings
+- **RAG Pipeline**: GPT-4o-mini powered question answering with context
+- **Voice Integration**: Real-time voice Q&A using Ragent voice gateway
+- **RESTful API**: Backend API endpoints for programmatic access
+- **Chat History**: Persistent chat history stored in browser
+- **Real-time Feedback**: Live status updates for uploads and responses
 
 ## Project Structure
 
 ```
-LEARN_RAG/
-├── app/
+learning_api_key/
+├── static/                   # Frontend files
+│   ├── index.html           # Main web interface
+│   ├── css/
+│   │   └── style.css        # UI styling
+│   └── js/
+│       └── app.js           # Frontend logic and API calls
+├── src/
 │   ├── __init__.py          # Flask app initialization
 │   ├── config.py            # Configuration management
+│   ├── adapter.py           # Ragent Flask integration
+│   ├── r_agent.py           # Ragent voice gateway setup
+│   ├── transcript.py        # Voice callback handler
 │   ├── routes/
-│   │   └── ask_route.py     # API endpoint for questions
+│   │   ├── ask_route.py     # API endpoint for questions
+│   │   └── upload_route.py  # API endpoint for file uploads
 │   ├── services/
 │   │   ├── rag_chain.py     # RAG chain construction
 │   │   ├── retriever.py     # Document retriever
 │   │   └── vectorstore.py   # PGVector store setup
-│   └── utils/
-│       └── format_docs.py   # Document formatting utilities
-├── files/                   # Directory for source documents
-│   └── raina.txt
-├── scripts/
-│   └── store_embeddings.py  # Script to embed and store documents
+│   ├── utils/
+│   │   └── format_docs.py   # Document formatting utilities
+│   └── prompts/
+│       └── prompt.py        # ChatPromptTemplate definition
+├── uploaded_files/          # Storage for uploaded documents
 ├── .env                     # Environment variables
 ├── run.py                   # Application entry point
 └── requirements.txt         # Python dependencies
@@ -72,31 +84,47 @@ PG_CONNECTION_STRING=postgresql://username:password@localhost:5432/your_database
 
 ## Usage
 
-### 1. Embed and Store Documents
-
-Place your text files in the `files/` directory, then run:
-
-```bash
-python scripts/store_embeddings.py
-```
-
-This will:
-- Load all `.txt` files from the `files/` directory
-- Split them into chunks (500 chars with 100 char overlap)
-- Generate embeddings using OpenAI's `text-embedding-3-small`
-- Store them in PostgreSQL with pgvector
-
-### 2. Start the API Server
+### 1. Start the Server
 
 ```bash
 python run.py
 ```
 
-The API will be available at `http://localhost:5000`
+The server will start on `http://0.0.0.0:5000`
 
-### 3. Query the API
+### 2. Using the Web Interface
 
-Send POST requests to `/ask`:
+1. Open your browser and navigate to `http://localhost:5000`
+2. You'll see the RAG Q&A System interface with two main sections:
+   - **Upload Documents**: Drag & drop or select TXT/PDF files to upload
+   - **Ask Questions**: Chat interface to ask questions about your documents
+
+#### Uploading Documents
+
+- Click the upload area or drag & drop your file
+- Supported formats: PDF, TXT (max 10MB)
+- Files are automatically processed and embedded
+- You'll see a success message when ready
+
+#### Asking Questions
+
+- Type your question in the chat input
+- Press Enter or click the send button
+- The AI will respond based on your uploaded documents
+- Chat history is saved automatically in your browser
+
+### 3. Using the API Directly
+
+You can also interact with the backend API programmatically:
+
+#### Upload a Document
+
+```bash
+curl -X POST http://localhost:5000/upload \
+  -F "file=@/path/to/your/document.pdf"
+```
+
+#### Ask a Question
 
 ```bash
 curl -X POST http://localhost:5000/ask \
@@ -107,12 +135,40 @@ curl -X POST http://localhost:5000/ask \
 Response format:
 ```json
 {
-  "question": "What is this document about?",
   "answer": "Based on the context provided..."
 }
 ```
 
 ## API Endpoints
+
+### GET /
+
+Serves the main web interface.
+
+### POST /upload
+
+Upload and process a document (TXT or PDF).
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Field name: `file`
+- Supported formats: `.txt`, `.pdf`
+- Max size: 10MB (frontend validation)
+
+**Response:**
+```json
+{
+  "message": "File processed & embeddings stored",
+  "filename": "document.pdf"
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Only .txt or .pdf allowed"
+}
+```
 
 ### POST /ask
 
@@ -128,7 +184,6 @@ Ask a question and get an answer based on stored documents.
 **Response:**
 ```json
 {
-  "question": "Your question here",
   "answer": "AI-generated answer based on retrieved context"
 }
 ```
@@ -136,13 +191,13 @@ Ask a question and get an answer based on stored documents.
 **Error Response:**
 ```json
 {
-  "error": "Question required"
+  "error": "RAG is not initialized"
 }
 ```
 
 ## Configuration
 
-The application uses the following configuration (in `app/config.py`):
+The application uses the following configuration (in `src/config.py`):
 
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `PG_URI`: PostgreSQL connection string

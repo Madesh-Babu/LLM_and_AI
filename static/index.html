@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Document Q&A System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <h1>RAG Q&A System</h1>
+                </div>
+                <p class="subtitle">Upload documents and ask questions powered by AI</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h2>Upload Documents</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-file-upload"></i>
+                            </div>
+                            <p class="upload-text">Drag & drop your file here or click to browse</p>
+                            <p class="upload-info">Supported formats: PDF, TXT</p>
+                            <input type="file" id="fileInput" accept=".pdf,.txt" hidden>
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open"></i> Choose File
+                            </button>
+                        </div>
+                        <div id="uploadStatus" class="upload-status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-comments"></i>
+                        <h2>Ask Questions</h2>
+                        <div class="voice-controls">
+                            <label class="toggle-switch" title="Auto-speak AI responses">
+                                <input type="checkbox" id="autoSpeakToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label"><i class="fas fa-volume-up"></i> Auto-speak</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chat-container">
+                            <div id="chatMessages" class="chat-messages">
+                                <div class="welcome-message">
+                                    <i class="fas fa-robot"></i>
+                                    <p>Welcome! Upload a document and start asking questions by typing or using your voice.</p>
+                                </div>
+                            </div>
+                            <div class="chat-input-container">
+                                <div id="voiceStatus" class="voice-status">
+                                    <div class="voice-animation">
+                                        <div class="voice-bar"></div>
+                                        <div class="voice-bar"></div>
+                                        <div class="voice-bar"></div>
+                                        <div class="voice-bar"></div>
+                                        <div class="voice-bar"></div>
+                                    </div>
+                                    <span id="voiceStatusText">Listening...</span>
+                                </div>
+                                <div class="input-wrapper">
+                                    <button class="btn btn-voice" onclick="toggleVoiceRecording()" id="voiceBtn" title="Voice input">
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                    <input
+                                        type="text"
+                                        id="questionInput"
+                                        class="chat-input"
+                                        placeholder="Type or click microphone to speak..."
+                                        onkeypress="handleKeyPress(event)"
+                                    >
+                                    <button class="btn btn-send" onclick="sendQuestion()" id="sendBtn">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by OpenAI GPT-4 & LangChain | <i class="fas fa-heart"></i> Built with Flask</p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
