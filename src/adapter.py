@@ -1,9 +1,9 @@
-from ragent.voice_gateway.interfaces import (
+from src.mock_ragent import (
     WebApp,
     WebFrameworkAdapter,
     WebSocketHandler,
+    UniversalSocketIOHandler,
 )
-from ragent.voice_gateway.infrastructure import UniversalSocketIOHandler
 from flask import request
 
 
