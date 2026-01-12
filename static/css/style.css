@@ -646,3 +646,79 @@ body {
         transform: scale(1.2);
     }
 }
+
+/* Voice Mode Selector */
+.voice-mode-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 15px;
+}
+
+.voice-mode-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.voice-mode-toggle {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 2px;
+    border: 1px solid #d1d5db;
+}
+
+.voice-mode-btn {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 18px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.voice-mode-btn.active {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.voice-mode-btn:hover:not(.active) {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Voice Controls Layout */
+.voice-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Ragent Status Indicators */
+.ragent-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.ragent-status.connected {
+    background: #10b981;
+}
+
+.ragent-status.disconnected {
+    background: #ef4444;
+}
+
+.ragent-status.recording {
+    background: #f59e0b;
+    animation: pulse 1.5s infinite;
+}
