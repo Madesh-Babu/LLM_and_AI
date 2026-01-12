@@ -1,5 +1,8 @@
 import os
 from dotenv import load_dotenv
+# Import mock ragent for Python 3 compatibility
+from src.mock_ragent import RealtimeConfig, ConfigService
+
 load_dotenv()
 
 class Config:
@@ -16,3 +19,8 @@ class Config:
         f"postgresql://{PG_USER}:{PG_PASSWORD}"
         f"@{PG_HOST}:{PG_PORT}/{PG_DB}"
     )
+
+def get_ragent_config():
+    config_overrides = RealtimeConfig.to_dict()
+    config_service = ConfigService(config_overrides=config_overrides)
+    return config_overrides, config_service.get_server_config()
