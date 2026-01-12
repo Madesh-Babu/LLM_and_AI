@@ -41,6 +41,7 @@
 from flask_socketio import SocketIO
 from src import create_app
 from src.services.rag_chain import build_rag_chain
+from src.r_agent import init_ragent
 
 # 1️⃣ Create Flask app
 app = create_app()
@@ -51,14 +52,15 @@ with app.app_context():
     app.config["RAG_CHAIN"] = rag_chain
     print("RAG INITIALIZED:", rag_chain)
 
-# 3️⃣ Attach Socket.IO (for future voice features)
+# 3️⃣ Attach Socket.IO (required by ragent)
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     async_mode="eventlet"
 )
 
-# 4️⃣ Skip ragent initialization (not installed)
+# 4️⃣ Initialize ragent voice gateway
+init_ragent(app, socketio)
 
 # 5️⃣ Run server
 if __name__ == "__main__":
