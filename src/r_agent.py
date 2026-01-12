@@ -1,5 +1,5 @@
 import asyncio
-from ragent.voice_gateway import CreateVoiceGateway
+from src.mock_ragent import CreateVoiceGateway
 
 from src.adapter import FlaskAdapter
 from src.transcript import create_ragent_callback
@@ -17,8 +17,11 @@ def init_ragent(app, socketio):
     on_transcript = asyncio.run(create_ragent_callback())
 
     # gateway
-    CreateVoiceGateway.create(
+    gateway = CreateVoiceGateway.create(
         framework_adapter=adapter,
         on_transcript=on_transcript,
         config_overrides=config_overrides,
     )
+    
+    print("🚀 Ragent voice gateway initialized with mock implementation")
+    return gateway
