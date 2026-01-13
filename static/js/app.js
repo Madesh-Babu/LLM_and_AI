@@ -915,12 +915,19 @@ document.addEventListener('keydown', (e) => {
     // Ctrl/Cmd + Shift + Space for voice
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'Space') {
         e.preventDefault();
-        toggleVoiceRecording();
+        // Use current voice mode
+        if (currentVoiceMode === 'ragent') {
+            toggleRagentVoice();
+        } else {
+            toggleVoiceRecording();
+        }
     }
     
     // Escape to stop recording/speaking
     if (e.key === 'Escape') {
-        if (isRecording) {
+        if (currentVoiceMode === 'ragent' && isRagentRecording) {
+            ragentClient.stopVoiceSession();
+        } else if (isRecording) {
             recognition.stop();
         }
         stopSpeaking();
@@ -955,3 +962,24 @@ function addVoiceFeedback(message, type = 'info') {
         }
     }, 3000);
 }
+
+// Initialize voice system when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎤 Initializing voice system...');
+    
+    // Initialize browser support check
+    checkBrowserSupport();
+    
+    // Set up voice button for browser mode by default
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (voiceBtn) {
+        voiceBtn.onclick = toggleVoiceRecording;
+        voiceBtn.title = 'Browser-based voice input';
+        console.log('🎤 Voice button set to browser mode');
+    }
+    
+    // Initialize voice mode to browser
+    currentVoiceMode = 'browser';
+    
+    console.log('🎤 Voice system initialized - Browser mode active');
+});
